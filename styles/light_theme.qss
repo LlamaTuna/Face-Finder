@@ -1,0 +1,122 @@
+QMainWindow {
+    background-color: lightgray;
+    color: #000000;
+    min-height: 650px;
+    border: 3px solid #14386a;
+}
+
+QSplitter::handle {
+    background: #14386a;
+    border-radius: 1px;
+}
+
+QLabel {
+    background-color: 'transparent';
+}
+
+QScrollBar {
+    background-color: #d3d3d3;
+}
+
+QMenuBar {
+    background-color: #14386a;
+    color: #FFFFFF;
+    font: bold 14px;
+}
+
+QMenuBar::item:selected {
+    background: #024fa7;
+}
+
+QMenuBar::item:pressed {
+    background: #024fa7;
+}
+
+QTableWidget {
+    background-color: #f3f3f3;
+    color: #000000;
+    border: 1px solid #5A5A5A;
+    border-radius: 3px;
+    padding: 2px;
+    margin: 6px;
+}
+
+QHeaderView::section {
+    background-color: #6e6e6e;  /* Slightly darker gray for headers */
+    color: #FFFFFF;
+    border: 1px solid #5A5A5A;
+    font: bold 12px;
+}
+
+QLineEdit{
+    background-color: #f3f3f3;
+    color: #000000;
+    border: 1px solid #5A5A5A;
+    border-radius: 3px;
+    min-width: 4em;
+    padding: 1px;
+}
+
+QTextEdit {
+    background-color: #f3f3f3;
+    border: 1px solid #5A5A5A;
+    border-radius: 3px;
+}
+
+QPushButton {
+    background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #024fa7, stop:1 #415989);
+    border-color: #14386a;
+    color: white;
+    border-style: inset;
+    border-width: 2px;
+    border-radius: 4px; 
+    font: bold 14px;
+    padding-left: 5px;
+    padding-right: 5px;
+    icon-size: 1em;
+}
+
+QPushButton#left_arrow_button {
+max-width: 40px;
+}
+
+QPushButton#right_arrow_button {
+max-width: 40px;
+}
+
+QPushButton::hover {
+background-color: #14386a;
+border-color: #14386a;
+border-style: outset;
+}
+
+QPushButton::pressed {
+    background-color: #288cbc;
+    border-style: inset;
+}
+
+QLabel#image_preview_label {
+    background-color: #f3f3f3;
+    qproperty-alignment: AlignCenter;
+    border: 1px solid #14386a;
+    border-radius: 3px; /* Reduced radius */
+    min-height: 112px;
+}
+
+QLabel#matched_face_label {
+    background-color: #f3f3f3;
+    qproperty-alignment: AlignCenter;
+    border: 1px solid #14386a;
+    border-radius: 3px; /* Reduced radius */
+    min-height: 112px;
+}
+
+QLabel#similarity_original_image_label {
+    qproperty-alignment: AlignCenter;
+}
+
+QProgressBar {
+    text-align: center;
+    border: 1px solid #14386a;
+    background-color: #f3f3f3;
+}

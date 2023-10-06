@@ -1,0 +1,125 @@
+/* dark themed styling for face finder application */
+QMainWindow {
+    background-color: #2C2C2C; 
+    color: #FFFFFF;
+    min-height: 650px;
+    border: 3px solid #5A5A5A;  /* Replaced blue with gray */
+}
+
+QSplitter::handle {
+    background: #5A5A5A;  /* Replaced blue with gray */
+    border-radius: 1px;
+}
+
+QLabel {
+    background-color: 'transparent';
+    color: #FFFFFF;
+}
+
+QScrollBar {
+    background-color: #434343;
+}
+
+QMenuBar {
+    background-color: #5A5A5A;  /* Replaced blue with gray */
+    color: #FFFFFF;
+    font: bold 14px;
+}
+
+QMenuBar::item:selected {
+    background: #6e6e6e;  /* Replaced blue with gray */
+}
+
+QMenuBar::item:pressed {
+    background: #6e6e6e;  /* Replaced blue with gray */
+}
+
+QTableWidget {
+    background-color: #1a1a1a;
+    color: #FFFFFF;
+    border: 1px solid #5A5A5A;
+    border-radius: 3px;
+    padding: 2px;
+    margin: 6px;
+}
+
+QHeaderView::section {
+    background-color: #6e6e6e;
+    color: #FFFFFF;
+    border: 1px solid #5A5A5A;
+    font: bold 12px;
+}
+
+QLineEdit {
+    background-color: #1a1a1a;
+    color: #FFFFFF;
+    border: 1px solid #5A5A5A;
+    border-radius: 3px;
+    min-width: 4em;
+    padding: 1px;
+}
+
+QTextEdit {
+    background-color: #1a1a1a;
+    color: #FFFFFF;
+    border: 1px solid #5A5A5A;
+    border-radius: 3px;
+}
+
+QPushButton {
+    background-color: #4e4e4e;
+    border-color: #5A5A5A;  /* Replaced blue with gray */
+    color: white;
+    border-style: inset;
+    border-width: 2px;
+    border-radius: 4px;
+    font: bold 14px;
+    padding-left: 5px;
+    padding-right: 5px;
+    icon-size: 1em;
+}
+
+QPushButton#left_arrow_button {
+    max-width: 40px;
+}
+
+QPushButton#right_arrow_button {
+    max-width: 40px;
+}
+
+QPushButton::hover {
+    background-color: #363636;
+    border-color: #5A5A5A;  /* Replaced blue with gray */
+    border-style: outset;
+}
+
+QPushButton::pressed {
+    background-color: #2a2a2a;
+    border-style: inset;
+}
+
+QLabel#image_preview_label {
+    background-color: #1a1a1a;
+    qproperty-alignment: AlignCenter;
+    border: 1px solid #5A5A5A;  /* Replaced blue with gray */
+    border-radius: 3px;
+    min-height: 112px;
+}
+
+QLabel#matched_face_label {
+    background-color: #1a1a1a;
+    qproperty-alignment: AlignCenter;
+    border: 1px solid #5A5A5A;  /* Replaced blue with gray */
+    border-radius: 3px;
+    min-height: 112px;
+}
+
+QLabel#similarity_original_image_label {
+    qproperty-alignment: AlignCenter;
+}
+
+QProgressBar {
+    text-align: center;
+    border: 1px solid #5A5A5A;  /* Replaced blue with gray */
+    background-color: #1a1a1a;
+}
