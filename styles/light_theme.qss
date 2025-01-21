@@ -2,11 +2,11 @@ QMainWindow {
     background-color: lightgray;
     color: #000000;
     min-height: 650px;
-    border: 3px solid #14386a;
+    border: 3px solid#888888;
 }
 
 QSplitter::handle {
-    background: #14386a;
+    background:#888888;
     border-radius: 1px;
 }
 
@@ -19,20 +19,18 @@ QScrollBar {
 }
 
 QMenuBar {
-    background-color: #14386a;
+    background-color:#888888;
     color: #FFFFFF;
     font: bold 14px;
 }
 
 QMenuBar::item:selected {
-    background: #024fa7;
+    background: #005AA5; /* Slightly darker shade for selected items */
 }
 
 QMenuBar::item:pressed {
-    background: #024fa7;
-}
-
-QTableWidget {
+    background: #005AA5;
+    
     background-color: #f3f3f3;
     color: #000000;
     border: 1px solid #5A5A5A;
@@ -42,7 +40,7 @@ QTableWidget {
 }
 
 QHeaderView::section {
-    background-color: #6e6e6e;  /* Slightly darker gray for headers */
+    background-color: #6e6e6e;
     color: #FFFFFF;
     border: 1px solid #5A5A5A;
     font: bold 12px;
@@ -64,12 +62,12 @@ QTextEdit {
 }
 
 QPushButton {
-    background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #024fa7, stop:1 #415989);
-    border-color: #14386a;
+    background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #668cff, stop:1 #002699);
+    border-color:#888888;
     color: white;
     border-style: inset;
     border-width: 2px;
-    border-radius: 4px; 
+    border-radius: 4px;
     font: bold 14px;
     padding-left: 5px;
     padding-right: 5px;
@@ -77,37 +75,37 @@ QPushButton {
 }
 
 QPushButton#left_arrow_button {
-max-width: 40px;
+    max-width: 40px;
 }
 
 QPushButton#right_arrow_button {
-max-width: 40px;
+    max-width: 40px;
 }
 
 QPushButton::hover {
-background-color: #14386a;
-border-color: #14386a;
-border-style: outset;
+    background-color: #005AA5;
+    border-color: #005AA5;
+    border-style: outset;
 }
 
 QPushButton::pressed {
-    background-color: #288cbc;
+    background-color: #004E91; /* Even darker shade for pressed state */
     border-style: inset;
 }
 
 QLabel#image_preview_label {
     background-color: #f3f3f3;
     qproperty-alignment: AlignCenter;
-    border: 1px solid #14386a;
-    border-radius: 3px; /* Reduced radius */
+    border: 1px solid#888888;
+    border-radius: 3px;
     min-height: 112px;
 }
 
 QLabel#matched_face_label {
     background-color: #f3f3f3;
     qproperty-alignment: AlignCenter;
-    border: 1px solid #14386a;
-    border-radius: 3px; /* Reduced radius */
+    border: 1px solid#888888;
+    border-radius: 3px;
     min-height: 112px;
 }
 
@@ -117,6 +115,6 @@ QLabel#similarity_original_image_label {
 
 QProgressBar {
     text-align: center;
-    border: 1px solid #14386a;
+    border: 1px solid#888888;
     background-color: #f3f3f3;
 }

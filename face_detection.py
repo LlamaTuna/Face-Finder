@@ -16,6 +16,8 @@ from scipy.spatial import distance
 from tensorflow.keras.applications.resnet import ResNet152, preprocess_input
 from PIL import Image
 import PIL.ExifTags
+from concurrent.futures import ThreadPoolExecutor
+import threading
 
 
 def is_hidden(filepath):
@@ -202,126 +204,103 @@ def convert_image_to_vector(img):
         print('An error occurred. Please check the logs for more details.')
         raise e
 
-def save_faces_from_folder(folder_path, output_folder, face_detector, progress_callback=None, cancel_flag=None, partial_update_callback=None):
+from concurrent.futures import ThreadPoolExecutor
+
+def save_faces_from_folder(folder_path, output_folder, face_detector, progress_callback=None, cancel_flag=None, batch_size=16, max_threads=4):
     """
-    Detect and save faces from all images within the provided folder path.
+    Detect and save faces from all images in the folder using multithreading for batch processing.
     """
     face_data = {}
+    processed_faces = set()
     valid_extensions = ['.png', '.jpeg', '.jpg', '.bmp']
-    processed_images = set()  # Keep track of processed images
-    processed_faces = set()  # Keep track of processed faces
 
-    # Use os.walk to traverse directories
+    # Collect all image paths
     image_paths = [os.path.join(root, name)
-                   for root, dirs, files in os.walk(folder_path)
-                   for name in files if not is_hidden(os.path.join(root, name))
-                   if os.path.splitext(name)[-1].lower() in valid_extensions]
+                   for root, _, files in os.walk(folder_path)
+                   for name in files
+                   if not is_hidden(os.path.join(root, name)) and is_valid_image_extension(name)]
 
     num_images = len(image_paths)
+    completed_images = 0  # Counter for progress tracking
+    progress_lock = threading.Lock()  # Lock for thread-safe progress updates
 
-    for idx, image_path in enumerate(image_paths, start=1):
-        img_hash = None 
-        # Check if processing should be cancelled
-        if cancel_flag and cancel_flag():
-            break
-        if not is_valid_image_extension(image_path):
-            logger.warning(f"{image_path} does not have a valid image extension. Skipping.")
-            continue
+    def update_progress():
+        nonlocal completed_images
+        with progress_lock:
+            completed_images += 1
+            if progress_callback:
+                progress = (completed_images / num_images) * 100
+                progress_callback(progress)
 
-        image_name = os.path.basename(image_path)
-        logger.debug(f'Processing image {idx} of {num_images}: {image_name}')
+    def process_batch(batch_images, batch_paths):
+        """
+        Process a batch of images for face detection and feature extraction.
+        """
+        for img, path in zip(batch_images, batch_paths):
+            if cancel_flag and cancel_flag():
+                return  # Exit if cancel is triggered
 
-        try:
-            img = cv2.imread(image_path)
-            if img is None:
-                raise ValueError(f"Failed to read image from {image_path}")
-        except Exception as e:
-            logger.exception(f"Error reading or processing image {image_name} in save_faces_from_folder: {str(e)}")
-            continue  # Skip to the next image
-
-        # Only retrieve EXIF data for the original input images
-        if os.path.splitext(image_name)[-1].lower() in valid_extensions:
-            exif_data = get_image_exif_data(image_path)
-        else:
-            exif_data = {}
-
-        # Print the EXIF data
-        logger.debug(f"EXIF data for {image_name}: {exif_data}")
-            
-        try:
-            # Using MTCNN for face detection
-            detected_faces = face_detector.detect_faces(img)
-            print(f'Number of faces detected: {len(detected_faces)}')
-
-            # Print confidence scores
-            
-            if not detected_faces:
-                print('No faces detected in the image.')
-
-            for face in detected_faces:
-                        confidence_score = face['confidence']
-                        print(f"Image: {image_name}, Face Confidence: {confidence_score}")
-                    
-        except Exception as e:
-            logger.exception(f'Error detecting faces in {image_name}. Skipping...')
-            continue
-
-        if len(detected_faces) > 0:
             try:
-                img_hash = hashlib.md5(open(image_path, 'rb').read()).hexdigest()
-
-                # If we have processed this image, continue to the next
-                if img_hash in processed_images:
-                    continue
-                
-                # Mark this image as processed
-                processed_images.add(img_hash)
-
-                face_data[img_hash] = {"file_name": image_name, "full_path": image_path, "faces": [], "exif_data": exif_data}
-
-                
+                # Perform face detection
+                detected_faces = face_detector.detect_faces(img)
                 if not detected_faces:
-                    print('No faces detected in the image.')
+                    continue
+
+                # Process each detected face
+                img_hash = hashlib.md5(open(path, 'rb').read()).hexdigest()
+                if img_hash in processed_faces:
+                    continue
+
+                face_data[img_hash] = {
+                    "file_name": os.path.basename(path),
+                    "full_path": path,
+                    "faces": []
+                }
 
                 for face in detected_faces:
-                                confidence = face['confidence']
-                                if confidence < 0.9:  # adjust this threshold as needed
-                                    continue
-                                left, top, width, height = face['box']
-                                right, bottom = left + width, top + height
-                                face_img = img[top:bottom, left:right] 
-                                
-                                # Align the face
-                                keypoints = face['keypoints']
-                                aligned_face_img = align_face(face_img, keypoints['left_eye'], keypoints['right_eye'])
+                    if face['confidence'] < 0.9:
+                        continue
 
-                                # Resize the aligned face to the desired size
-                                resized_face_img = resize_image_with_aspect_ratio(aligned_face_img, (224, 224))
-                                
-                                # Convert the face image into a feature vector
-                                face_vector = convert_image_to_vector(resized_face_img)
+                    left, top, width, height = face['box']
+                    face_img = img[top:top + height, left:left + width]
+                    keypoints = face['keypoints']
 
-                                face_img_hash = hashlib.sha256(face_vector.tobytes()).hexdigest()
-                                
-                                # If we have processed this face, continue to the next
-                                if face_img_hash in processed_faces:
-                                    continue
-                                
-                                # Mark this face as processed
-                                processed_faces.add(face_img_hash)
+                    aligned_face_img = align_face(face_img, keypoints['left_eye'], keypoints['right_eye'])
+                    resized_face_img = resize_image_with_aspect_ratio(aligned_face_img, (224, 224))
+                    face_vector = convert_image_to_vector(resized_face_img)
 
-                                face_data[img_hash]["faces"].append(face_vector)
-                                image_output_path = os.path.join(output_folder, f"{img_hash}_{len(face_data[img_hash]['faces'])}.png")
-                                cv2.imwrite(image_output_path, resized_face_img)
+                    face_img_hash = hashlib.sha256(face_vector.tobytes()).hexdigest()
+                    if face_img_hash in processed_faces:
+                        continue
+
+                    processed_faces.add(face_img_hash)
+                    face_data[img_hash]["faces"].append(face_vector)
+
+                    # Save aligned face for reference
+                    output_path = os.path.join(output_folder, f"{img_hash}_{len(face_data[img_hash]['faces'])}.png")
+                    cv2.imwrite(output_path, resized_face_img)
+
             except Exception as e:
-                logger.exception(f"Error occurred in save_faces_from_folder: {e}")
-                continue
+                logger.exception(f"Error processing image {os.path.basename(path)}: {str(e)}")
+            finally:
+                update_progress()  # Update progress after each image
 
-        if progress_callback:
-            progress = idx / num_images * 100
-            progress_callback(progress)
+    # Multithreaded processing
+    with ThreadPoolExecutor(max_threads) as executor:
+        num_batches = (num_images + batch_size - 1) // batch_size
+        for batch_idx in range(num_batches):
+            if cancel_flag and cancel_flag():
+                break
+
+            batch_paths = image_paths[batch_idx * batch_size:(batch_idx + 1) * batch_size]
+            batch_images = [cv2.imread(path) for path in batch_paths]
+
+            # Submit the batch for processing
+            executor.submit(process_batch, batch_images, batch_paths)
 
     return face_data
+
+
 
 def find_matching_face(image_path, face_data, face_detector, threshold=.75):
     """
